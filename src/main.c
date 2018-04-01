@@ -177,7 +177,7 @@ static uint64_t _process_input(FILE *input, counter_type_t counter_type) {
   char new_byte, prev_byte = 0;
 
   while (buffer_len = fread(buffer, 1, sizeof(buffer), input), buffer_len > 0) {
-    for( size_t i = 0; i < buffer_len; i++ ) {
+    for (size_t i = 0; i < buffer_len; i++) {
       new_byte = buffer[i];
       switch (counter_type) {
         case counter_type_byte:
@@ -199,6 +199,9 @@ static uint64_t _process_input(FILE *input, counter_type_t counter_type) {
             counter++;
           }
           break;
+
+        case counter_type_invalid:
+          return 0;
       }
 
       prev_byte = new_byte;
