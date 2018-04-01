@@ -114,28 +114,28 @@ static void _arg_parse(struct args *args, int argc, const char **argv) {
         break;
 
       case 'v':
-        *verbose = true;
+        verbose = true;
         break;
 
       case 'c':
-        *type = counter_type_byte;
+        type = counter_type_byte;
         break;
 
       case 'm':
-        *type = counter_type_char;
+        type = counter_type_char;
         break;
 
       case 'w':
-        *type = counter_type_word;
+        type = counter_type_word;
         break;
 
       case 'l':
-        *type = counter_type_line;
+        type = counter_type_line;
         break;
     }
   }
 
-  if (*type == counter_type_invalid) {
+  if (type == counter_type_invalid) {
     printf("No se especificó tipo de contador.\n");
     exit(1);
   }
