@@ -172,33 +172,37 @@ static void _arg_parse(struct args *args, int argc, const char **argv) {
  */
 static uint64_t _process_input(FILE *input, counter_type_t counter_type) {
   unsigned int counter = 0;
+  char buffer[2048];
+  size_t buffer_len = 0;
   char new_byte, prev_byte = 0;
-  while (fread(&new_byte, 1, 1, input) != 0) {
-    switch (counter_type) {
-      case counter_type_byte:
-        counter++;
-        break;
 
-      case counter_type_char:
-        counter += (new_byte & 0xc0) != 0x80;
-        break;
+  while (buffer_len = fread(buffer, 1, sizeof(buffer), input), buffer_len > 0) {
+    for( size_t i = 0; i < buffer_len; i++ ) {
+      new_byte = buffer[i];
+      switch (counter_type) {
+        case counter_type_byte:
+          counter++;
+          break;
 
-      case counter_type_word:
-        if (isspace(prev_byte) && !isspace(new_byte)) {
-          counter++;
-        }
-        break;
+        case counter_type_char:
+          counter += (new_byte & 0xc0) != 0x80;
+          break;
 
-      case counter_type_line:
-        if (counter == 0) {
-          counter++;
-        } else if (new_byte == '\n') {
-          counter++;
-        }
-        break;
+        case counter_type_word:
+          if (prev_byte == 0 || (isspace(prev_byte) && !isspace(new_byte))) {
+            counter++;
+          }
+          break;
+
+        case counter_type_line:
+          if (new_byte == '\n') {
+            counter++;
+          }
+          break;
+      }
+
+      prev_byte = new_byte;
     }
-
-    prev_byte = new_byte;
   }
 
   return counter;
