@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include<string.h>
 
 /** Tipos de datos */
 
@@ -36,8 +37,12 @@ struct args {
   /* el tipo de contador a utilizar para los datos de entrada. */
   counter_type_t counter_type;
 
-  /* handler del cual leer los datos de entrada */
-  FILE *input;
+  /* Path del archivo con los datos de entrada */
+  char path[255];
+  
+  /* Boolean ndica si se usa stdin */
+  bool is_stdin;
+  
 };
 
 /** Estructuras de datos */
@@ -52,6 +57,7 @@ static const struct option _long_opts[] = {
     {.name = "chars", .has_arg = no_argument, .flag = NULL, .val = 'm'},
     {.name = "words", .has_arg = no_argument, .flag = NULL, .val = 'w'},
     {.name = "lines", .has_arg = no_argument, .flag = NULL, .val = 'l'},
+    {.name = "input", .has_arg = no_argument, .flag = NULL, .val = 'i'},
     {0},
 };
 
@@ -63,7 +69,7 @@ static const struct option _long_opts[] = {
  * @param bin_name argv[0].
  */
 static void _print_help(const char *bin_name) {
-  printf("Uso: %s [OPCIONES] [ARCHIVO]\n", bin_name);
+  printf("Uso: %s [OPCIONES]\n", bin_name);
   printf("Las opciones aceptadas son:\n");
   printf("  -h, --help        Imprime este mensaje y termina.\n");
   printf("  -V, --version     Imprime la versión y termina.\n");
@@ -73,6 +79,7 @@ static void _print_help(const char *bin_name) {
       "  -m, --chars       Cuenta los caracteres en el archivo de entrada.\n");
   printf("  -w, --words       Cuenta las palabras en el archivo de entrada.\n");
   printf("  -l, --lines       Cuenta las líneas en el archivo de entrada.\n");
+  printf("  -i, --input       Indica que se usara la ruta que siga al -i, si no existe se usara stdin\n");
   printf("\n");
   printf(
       "ARCHIVO es el nombre del archivo a leer, o '-' para leer desde "
@@ -98,8 +105,9 @@ static void _print_version(const char *bin_name) {
 static void _arg_parse(struct args *args, int argc, const char **argv) {
   bool verbose = false;
   counter_type_t type = counter_type_invalid;
-
+  args->is_stdin = true;
   int ch = -1;
+  
   while ((ch = getopt_long(argc, (char **)argv, "hVvcmwlf:", _long_opts,
                            NULL)) != -1) {
     switch (ch) {
@@ -132,8 +140,16 @@ static void _arg_parse(struct args *args, int argc, const char **argv) {
       case 'l':
         type = counter_type_line;
         break;
+        
+        
+      case 'i':
+        strcpy(args->path,argv[optind]);
+        args->is_stdin = false;
+        break;
+        
     }
   }
+  
 
   if (type == counter_type_invalid) {
     printf("No se especificó tipo de contador.\n");
@@ -142,7 +158,6 @@ static void _arg_parse(struct args *args, int argc, const char **argv) {
 
   /* llena la estructura de salida */
   args->verbose = verbose;
-  args->input = stdin; // TODO: obtener desde los datos de entrada
   args->counter_type = type;
 }
 
@@ -181,8 +196,23 @@ int main(int argc, const char *argv[]) {
 
   /* procesa la entrada */
   // TODO: manejar posibles casos de error en la lectura del archivo
-  uint64_t count = _process_input(args.input, args.counter_type);
-  printf("%" PRIu64 "\n", count);
+  
+  //Si es STDin, pone el archivo como stdin. Si no abrimos con la ruta
+  FILE* file;
 
+  
+  if(args.is_stdin){
+      file = stdin;
+  }else{
+      file = fopen(args.path, "r");
+      if(file == 0){
+          perror("Error");
+          exit(0);
+      }
+  } 
+  
+  uint64_t count = _process_input(file, args.counter_type);
+  printf("%" PRIu64 "\n", count);
+  fclose(file);
   return EXIT_SUCCESS;
 }
