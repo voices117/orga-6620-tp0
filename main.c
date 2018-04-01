@@ -38,7 +38,7 @@ struct args {
   counter_type_t counter_type;
 
   /* Path del archivo con los datos de entrada */
-  char path[255];
+  const char *path;
 
   /* Boolean ndica si se usa stdin */
   bool is_stdin;
@@ -141,7 +141,7 @@ static void _arg_parse(struct args *args, int argc, const char **argv) {
         break;
 
       case 'i':
-        strcpy(args->path, argv[optind - 1]);
+        args->path = argv[optind - 1];
         args->is_stdin = false;
         break;
 
