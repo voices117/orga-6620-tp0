@@ -5,8 +5,8 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
-#include<string.h>
 
 /** Tipos de datos */
 
@@ -39,10 +39,9 @@ struct args {
 
   /* Path del archivo con los datos de entrada */
   char path[255];
-  
+
   /* Boolean ndica si se usa stdin */
   bool is_stdin;
-  
 };
 
 /** Estructuras de datos */
@@ -57,7 +56,7 @@ static const struct option _long_opts[] = {
     {.name = "chars", .has_arg = no_argument, .flag = NULL, .val = 'm'},
     {.name = "words", .has_arg = no_argument, .flag = NULL, .val = 'w'},
     {.name = "lines", .has_arg = no_argument, .flag = NULL, .val = 'l'},
-    {.name = "input", .has_arg = no_argument, .flag = NULL, .val = 'i'},
+    {.name = "input", .has_arg = required_argument, .flag = NULL, .val = 'i'},
     {0},
 };
 
@@ -75,11 +74,12 @@ static void _print_help(const char *bin_name) {
   printf("  -V, --version     Imprime la versión y termina.\n");
   printf("  -v, --verbose     Salida más detallada.\n");
   printf("  -c, --bytes       Cuenta los bytes en el archivo de entrada.\n");
-  printf(
-      "  -m, --chars       Cuenta los caracteres en el archivo de entrada.\n");
+  printf("  -m, --chars       Cuenta los caracteres en el archivo de entrada.\n");
   printf("  -w, --words       Cuenta las palabras en el archivo de entrada.\n");
   printf("  -l, --lines       Cuenta las líneas en el archivo de entrada.\n");
-  printf("  -i, --input       Indica que se usara la ruta que siga al -i, si no existe se usara stdin\n");
+  printf(
+      "  -i, --input [ARCHIVO] Indica que se usara la ruta que siga al -i, si "
+      "no existe se usara stdin.\n");
   printf("\n");
   printf(
       "ARCHIVO es el nombre del archivo a leer, o '-' para leer desde "
@@ -107,9 +107,8 @@ static void _arg_parse(struct args *args, int argc, const char **argv) {
   counter_type_t type = counter_type_invalid;
   args->is_stdin = true;
   int ch = -1;
-  
-  while ((ch = getopt_long(argc, (char **)argv, "hVvcmwlf:", _long_opts,
-                           NULL)) != -1) {
+
+  while ((ch = getopt_long(argc, (char **)argv, "hVvcmwli:", _long_opts, NULL)) != -1) {
     switch (ch) {
       case 'h':
         _print_help(argv[0]);
@@ -140,16 +139,18 @@ static void _arg_parse(struct args *args, int argc, const char **argv) {
       case 'l':
         type = counter_type_line;
         break;
-        
-        
+
       case 'i':
-        strcpy(args->path,argv[optind]);
+        strcpy(args->path, argv[optind - 1]);
         args->is_stdin = false;
         break;
-        
+
+      /* this is returned when a required argument was not provided */
+      case ':':
+      case '?':
+        exit(1);
     }
   }
-  
 
   if (type == counter_type_invalid) {
     printf("No se especificó tipo de contador.\n");
@@ -170,22 +171,17 @@ static void _arg_parse(struct args *args, int argc, const char **argv) {
  * @return Resultado del contador.
  */
 static uint64_t _process_input(FILE *input, counter_type_t counter_type) {
-    unsigned int counter = 0;
-    char byte;
-    while (fread(&byte, 1, 1, input) != 0) { 
-        
-        switch(counter_type){
-            
-            case counter_type_byte:
-                counter++;
-            break;
-            
-        }
-        
+  unsigned int counter = 0;
+  char byte;
+  while (fread(&byte, 1, 1, input) != 0) {
+    switch (counter_type) {
+      case counter_type_byte:
+        counter++;
+        break;
     }
-    
-          
-    return counter;
+  }
+
+  return counter;
 }
 
 int main(int argc, const char *argv[]) {
@@ -196,21 +192,20 @@ int main(int argc, const char *argv[]) {
 
   /* procesa la entrada */
   // TODO: manejar posibles casos de error en la lectura del archivo
-  
-  //Si es STDin, pone el archivo como stdin. Si no abrimos con la ruta
-  FILE* file;
 
-  
-  if(args.is_stdin){
-      file = stdin;
-  }else{
-      file = fopen(args.path, "r");
-      if(file == 0){
-          perror("Error");
-          exit(0);
-      }
-  } 
-  
+  // Si es STDin, pone el archivo como stdin. Si no abrimos con la ruta
+  FILE *file;
+
+  if (args.is_stdin) {
+    file = stdin;
+  } else {
+    file = fopen(args.path, "r");
+    if (file == 0) {
+      perror("Error");
+      exit(0);
+    }
+  }
+
   uint64_t count = _process_input(file, args.counter_type);
   printf("%" PRIu64 "\n", count);
   fclose(file);
