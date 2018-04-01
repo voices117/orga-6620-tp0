@@ -155,7 +155,22 @@ static void _arg_parse(struct args *args, int argc, const char **argv) {
  * @return Resultado del contador.
  */
 static uint64_t _process_input(FILE *input, counter_type_t counter_type) {
-  return 0;
+    unsigned int counter = 0;
+    char byte;
+    while (fread(&byte, 1, 1, input) != 0) { 
+        
+        switch(counter_type){
+            
+            case counter_type_byte:
+                counter++;
+            break;
+            
+        }
+        
+    }
+    
+          
+    return counter;
 }
 
 int main(int argc, const char *argv[]) {
