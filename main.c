@@ -214,10 +214,7 @@ int main(int argc, const char *argv[]) {
   /* parsea la línea de comandos */
   _arg_parse(&args, argc, argv);
 
-  /* procesa la entrada */
-  // TODO: manejar posibles casos de error en la lectura del archivo
-
-  // Si es STDin, pone el archivo como stdin. Si no abrimos con la ruta
+  /* Si es STDin, pone el archivo como stdin. Si no abrimos con la ruta */
   FILE *file;
 
   if (args.is_stdin) {
@@ -230,8 +227,10 @@ int main(int argc, const char *argv[]) {
     }
   }
 
+  /* procesa la entrada */
   uint64_t count = _process_input(file, args.counter_type);
   printf("%" PRIu64 "\n", count);
+
   fclose(file);
   return EXIT_SUCCESS;
 }
