@@ -31,9 +31,6 @@ typedef enum {
 
 /** Parámetros parseados de la línea de comandos. */
 struct args {
-  /* indica si el programa se debe ejecutar en modo verbose. */
-  bool verbose;
-
   /* el tipo de contador a utilizar para los datos de entrada. */
   counter_type_t counter_type;
 
@@ -51,9 +48,8 @@ struct args {
 static const struct option _long_opts[] = {
     {.name = "help", .has_arg = no_argument, .flag = NULL, .val = 'h'},
     {.name = "version", .has_arg = no_argument, .flag = NULL, .val = 'V'},
-    {.name = "verbose", .has_arg = no_argument, .flag = NULL, .val = 'v'},
-    {.name = "bytes", .has_arg = no_argument, .flag = NULL, .val = 'c'},
-    {.name = "chars", .has_arg = no_argument, .flag = NULL, .val = 'm'},
+    {.name = "bytes", .has_arg = no_argument, .flag = NULL, .val = 'b'},
+    {.name = "chars", .has_arg = no_argument, .flag = NULL, .val = 'c'},
     {.name = "words", .has_arg = no_argument, .flag = NULL, .val = 'w'},
     {.name = "lines", .has_arg = no_argument, .flag = NULL, .val = 'l'},
     {.name = "input", .has_arg = required_argument, .flag = NULL, .val = 'i'},
@@ -72,9 +68,8 @@ static void _print_help(const char *bin_name) {
   printf("Las opciones aceptadas son:\n");
   printf("  -h, --help        Imprime este mensaje y termina.\n");
   printf("  -V, --version     Imprime la versión y termina.\n");
-  printf("  -v, --verbose     Salida más detallada.\n");
-  printf("  -c, --bytes       Cuenta los bytes en el archivo de entrada.\n");
-  printf("  -m, --chars       Cuenta los caracteres en el archivo de entrada.\n");
+  printf("  -b, --bytes       Cuenta los bytes en el archivo de entrada.\n");
+  printf("  -c, --chars       Cuenta los caracteres en el archivo de entrada.\n");
   printf("  -w, --words       Cuenta las palabras en el archivo de entrada.\n");
   printf("  -l, --lines       Cuenta las líneas en el archivo de entrada.\n");
   printf(
@@ -103,12 +98,11 @@ static void _print_version(const char *bin_name) {
  * @param argv
  */
 static void _arg_parse(struct args *args, int argc, const char **argv) {
-  bool verbose = false;
   counter_type_t type = counter_type_invalid;
   args->is_stdin = true;
   int ch = -1;
 
-  while ((ch = getopt_long(argc, (char **)argv, "hVvcmwli:", _long_opts, NULL)) != -1) {
+  while ((ch = getopt_long(argc, (char **)argv, "hVbcwli:", _long_opts, NULL)) != -1) {
     switch (ch) {
       case 'h':
         _print_help(argv[0]);
@@ -120,15 +114,11 @@ static void _arg_parse(struct args *args, int argc, const char **argv) {
         exit(0);
         break;
 
-      case 'v':
-        verbose = true;
-        break;
-
-      case 'c':
+      case 'b':
         type = counter_type_byte;
         break;
 
-      case 'm':
+      case 'c':
         type = counter_type_char;
         break;
 
@@ -142,7 +132,7 @@ static void _arg_parse(struct args *args, int argc, const char **argv) {
 
       case 'i':
         args->path = argv[optind - 1];
-        args->is_stdin = false;
+        args->is_stdin = (strcmp("-", args->path) == 0);
         break;
 
       /* this is returned when a required argument was not provided */
@@ -158,7 +148,6 @@ static void _arg_parse(struct args *args, int argc, const char **argv) {
   }
 
   /* llena la estructura de salida */
-  args->verbose = verbose;
   args->counter_type = type;
 }
 
