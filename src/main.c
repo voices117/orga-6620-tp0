@@ -1,3 +1,4 @@
+#include <ctype.h>
 #include <getopt.h>
 #include <inttypes.h>
 #include <stdbool.h>
@@ -7,7 +8,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <ctype.h>
 
 /** Tipos de datos */
 
