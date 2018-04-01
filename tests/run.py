@@ -7,26 +7,26 @@ import subprocess
 # cada lista tiene los parámetros cmd line y el resultado esperado del contador
 TEST_CASES = {
     'hola': [
+        ['-b', 4],
         ['-c', 4],
-        ['-m', 4],
         ['-w', 1],
         ['-l', 0],
     ],
     'hola mundo!': [
+        ['-b', 11],
         ['-c', 11],
-        ['-m', 11],
         ['-w', 2],
         ['-l', 0],
     ],
     'con UTF-8: áéíóú': [
-        ['-c', 21],
-        ['-m', 16],
+        ['-b', 21],
+        ['-c', 16],
         ['-w', 3],
         ['-l', 0],
     ],
     'con\nmas\nlineas': [
+        ['-b', 14],
         ['-c', 14],
-        ['-m', 14],
         ['-w', 3],
         ['-l', 2],
     ]
