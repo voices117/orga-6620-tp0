@@ -1,0 +1,42 @@
+\chapter{Introducci\'on}\label{ch:introduction}
+
+\section{El comando wc}
+
+El comando de Unix wc toma como entrada un archivo o stdin, y cuenta las palabras, las l\'ineas y la cantidad de caracteres que contiene.
+
+\section{ Programas a desarrollar}
+El programa a escribir, en lenguaje C, recibir\'a un nombre de archivo que
+contiene texto (o el archivo mismo por stdin) e imprimir\'a por stdout la
+cantidad de l\'ineas, palabras y caracteres que contiene, junto con el nombre
+del archivo.
+
+\section{Ejemplos}
+Primero, usamos la opci\'on -h para ver el mensaje de ayuda:\
+
+\begin{lstlisting}[numbers=left, tabsize=2, basicstyle=\fontsize{11}{13}\ttfamily, frame=single, caption={mensaje de ayuda}]
+$ tp0 -h
+Usage:
+tp0 -h
+tp0 -V
+tp0 [options] file
+Options:
+-V, --version Print version and quit.
+-h, --help Print this information.
+-l, --words Print number of lines in file.
+-w, --words Print number of words in file.
+-c, --words Print number of characters in file.
+-i, --input Path to input file.
+Examples:
+tp0 -w -i input.txt
+Luego, lo usamos con un peque\~no fragmento de texto:
+$echo -n "El tractorcito rojo que silbo y bufo" > entrada.txt
+$tp0 -w -i entrada.txt
+7 entrada.txt
+$
+\end{lstlisting}
+
+\section{Mediciones}
+
+Se deber\'a medir el tiempo insumido por el programa para el caso de los archivos alice.txt, beowulf.txt, cyclopedia.txt y elquijote.txt. \\
+
+Graficar el tiempo insumido contra el tama\~no de muestra. Se deber\'a comprobar que el programa acepta las opciones dadas, y que reporta un error ante situaciones an\'omalas (como no encontrar el archivo solicitado). La ejecuci\'on del programa debe realizarse bajo el entorno MIPS.
